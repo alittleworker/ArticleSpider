@@ -75,10 +75,10 @@ class MySqlTwistedPipeline(object):
 
     def do_insert(self, cursor, item):
         insert_sql = """
-                    insert into article_spider(title, creat_date, url, url_object_id)
-                    VALUES (%s, %s, %s, %s)
+                    insert into article_spider(title,creat_date,url,url_object_id,front_image_url,comment_num,collect_num,praise_num,tags,content)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
-        cursor.execute(insert_sql, (item["title"], item["creat_date"], item["url"], item["url_object_id"]))
+        cursor.execute(insert_sql, (item["title"], item["creat_date"], item["url"], item["url_object_id"],item["front_image_url"], item["comment_num"], item["collect_num"], item["praise_num"], item["tags"], item["content"]))
 
 
 class JsonExporterPipeline(object):
@@ -99,10 +99,10 @@ class JsonExporterPipeline(object):
 
 class ArticleImagePipeline(ImagesPipeline):
     def item_completed(self, results, item, info):
-        if "fromt_image_path" in item:
+        if "front_image_url" in item:
             for ok, value in results:
                 image_file_path = value["path"]
-            item["fromt_image_path"] = image_file_path
+            item["front_image_path"] = image_file_path
 
         return item
 

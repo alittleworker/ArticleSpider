@@ -44,10 +44,9 @@ def num_convert(value):
         value = 0
     return value
 
+
 def remove_comment_tags(value):
-    if value.endswith("评论"):
-        return ""
-    else:
+    if "评论" not in value:
         return value
 
 
@@ -64,7 +63,7 @@ class JobBoleArticleItem(scrapy.Item):
     front_image_url = scrapy.Field(
         output_processor=MapCompose(return_value)
     )
-    fromt_image_path = scrapy.Field()
+    front_image_path = scrapy.Field()
     creat_date = scrapy.Field(
         input_processor=MapCompose(date_convert)
     )
