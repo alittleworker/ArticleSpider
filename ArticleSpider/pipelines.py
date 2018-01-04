@@ -33,7 +33,7 @@ class JsonWithEncodingPipeline(object):
         self.file.close()
 
 
-class MyaqlPipeline(object):
+class MySqlPipeline(object):
     def __init__(self):
         self.conn = MySQLdb.connect('localhost', 'root', 'root', 'scrapy_spider', charset="utf8", use_unicode=True)
         self.cursor = self.conn.cursor()
