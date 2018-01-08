@@ -85,7 +85,7 @@ class GetIp(object):
             return proxy_url
         else:
             self.delete_ip(ip)
-            print(proxy_url, "false")
+            print(proxy_url, " is false")
             return self.get_random_ip()
 
 # print(crawl_ips())
