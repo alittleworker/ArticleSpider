@@ -74,11 +74,8 @@ class MySqlTwistedPipeline(object):
         print (failure)
 
     def do_insert(self, cursor, item):
-        insert_sql = """
-                    insert into article_spider(title,creat_date,url,url_object_id,front_image_url,comment_num,collect_num,praise_num,tags,content)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """
-        cursor.execute(insert_sql, (item["title"], item["creat_date"], item["url"], item["url_object_id"],item["front_image_url"], item["comment_num"], item["collect_num"], item["praise_num"], item["tags"], item["content"]))
+        insert_sql, params = item.get_insert_sql()
+        cursor.execute(insert_sql, params)
 
 
 class JsonExporterPipeline(object):

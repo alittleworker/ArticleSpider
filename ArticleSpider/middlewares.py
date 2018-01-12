@@ -74,26 +74,25 @@ class RandomUserAgentMiddleware(object):
             return getattr(self.ua, self.ua_type)
 
         request.headers.setdefault('User-Agent', get_ua())
-        proxy_ip = GetIp().get_random_ip()
-        request.meta["proxy"] = proxy_ip
+        # proxy_ip = GetIp().get_random_ip()
+        # request.meta["proxy"] = proxy_ip
 
 
 from selenium import webdriver
 from scrapy.http import HtmlResponse
+import time
+
 
 #通过chrome请求动态网页
 class JSPageMiddleware(object):
-    def __init__(self):
-        self.browser = webdriver.Chrome(executable_path="F:\selenium-driver\chromedriver.exe")
-        super(JSPageMiddleware, self).__init__()
 
     def process_request(self, request, spider):
         if request.url == "https://www.zhihu.com/signup":
-            self.browser.get("https://www.zhihu.com/signup")
-
-            self.browser.find_element_by_css_selector(".SignContainer-switch span[data-reactid='60']").click()
-            self.browser.find_element_by_css_selector(".Login-content input[name='username']").send_keys("15811203865")
-            self.browser.find_element_by_css_selector(".SignFlow-password input[name='password']").send_keys("199310lcy015")
-            self.browser.find_element_by_css_selector(".Login-content button.SignFlow-submitButton").click()
-
-            return HtmlResponse(url=self.browser.current_url, body=self.browser.page_source, request=request, encoding="utf-8")
+            spider.browser.get("https://www.zhihu.com/signup")
+            time.sleep(2)
+            spider.browser.find_element_by_css_selector(".SignContainer-switch span[data-reactid='93']").click()
+            spider.browser.find_element_by_css_selector(".Login-content input[name='username']").send_keys("15811203865")
+            spider.browser.find_element_by_css_selector(".SignFlow-password input[name='password']").send_keys("199310lcy015")
+            spider.browser.find_element_by_css_selector(".Login-content button.SignFlow-submitButton").click()
+            time.sleep(2)
+            return HtmlResponse(url=spider.browser.current_url, body=spider.browser.page_source, request=request, encoding="utf-8")

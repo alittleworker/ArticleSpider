@@ -15,11 +15,21 @@ class JobboleSpider(scrapy.Spider):
     # start_urls = ['http://blog.jobbole.com/113343/']
     start_urls = ['http://blog.jobbole.com/all-posts/']
 
+    #收集伯乐在线所有404的url以及404页面数
+    handle_httpstatus_list = [404, 302]
+
+    def __init__(self):
+        self.fail_urls = []
+
     def parse(self, response):
         """
         1.获取文章列表中的文章url并交给scrapy下载后进行解析
         2.获取下一页url并交给scrapy下载，下载完后交给parse函数
         """
+        if response.status == 404 or response.status == 302:
+            self.fail_urls.append(response.url)
+            self.crawler.stats.inc_value("failed_url")
+
 
         #解析页面文章url并交给scrapy下载后进行解析
         post_nodes = response.css("#archive .floated-thumb .post-thumb a")
