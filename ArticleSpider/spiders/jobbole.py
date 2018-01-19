@@ -9,6 +9,7 @@ from ArticleSpider.items import JobBoleArticleItem,ArticleItemLoader
 from ArticleSpider.utils.common import get_md5
 from scrapy.loader import ItemLoader
 
+
 class JobboleSpider(scrapy.Spider):
     name = 'jobbole'
     allowed_domains = ['blog.jobbole.com']

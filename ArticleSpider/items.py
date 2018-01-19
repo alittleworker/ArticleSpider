@@ -14,6 +14,11 @@ from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from datetime import datetime
 from ArticleSpider.settings import SQL_DATETIME_FORMAT, SQL_DATE_FORMAT
 from ArticleSpider.utils.common import extract_num
+from w3lib.html import remove_tags
+from ArticleSpider.models.es_types import ArticleType
+
+from elasticsearch_dsl.connections import connections
+es = connections.create_connection(ArticleType._doc_type.using)
 
 
 class ArticlespiderItem(scrapy.Item):
@@ -25,6 +30,7 @@ class ArticlespiderItem(scrapy.Item):
 class ArticleItemLoader(ItemLoader):
     #自定义itemloader
     default_output_processor = TakeFirst()
+
 
 class ZhihuItemLoader(ItemLoader):
     #自定义itemloader
@@ -60,6 +66,25 @@ def remove_comment_tags(value):
 def return_value(value):
     return value
 
+def gen_suggests(index, info_tuple):
+    #根据字符串生成搜索建议数据
+    used_words = set()#用以去重
+    suggests = []
+    for text, weight in info_tuple:
+        if text:
+            #调用es的analyze接口分析字符串
+            words = es.indices.analyze(index=index, params={'analyzer':'ik_max_word','filter': ["lowercase"]}, body=text)
+            analyzed_words = set([r["token"] for r in words["tokens"] if len(r["token"] )>1])
+            new_words = analyzed_words - used_words
+            used_words = new_words | used_words
+        else:
+            new_words = set()
+
+        if new_words:
+            suggests.append({"input":list(new_words), "weight":weight})
+
+        return suggests
+
 
 class JobBoleArticleItem(scrapy.Item):
     title = scrapy.Field(
@@ -88,6 +113,26 @@ class JobBoleArticleItem(scrapy.Item):
         input_processor=MapCompose(remove_comment_tags),
         output_processor=Join(",")
     )
+
+    def save2elastic(self):
+        # 将item转换为es数据
+        article = ArticleType()
+        article.title = self["title"]
+        article.url_object_id = self["url_object_id"]
+        article.url = self["url"]
+        article.front_image_url = self["front_image_url"]
+        if "front_image_path" in self:
+            article.front_image_path = self["front_image_path"]
+        article.creat_date = self["creat_date"]
+        article.praise_num = self["praise_num"]
+        article.collect_num = self["collect_num"]
+        article.comment_num = self["comment_num"]
+        article.content = remove_tags(self["content"])
+        article.tags = self["tags"]
+        article.meta.id = self["url_object_id"]
+
+        article.suggest = gen_suggests(ArticleType._doc_type.index, ((article.title,10),(article.tags,7)))
+        article.save()
 
 class ZhihuQuestionItem(scrapy.Item):
     zhihu_id = scrapy.Field()

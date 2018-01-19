@@ -70,10 +70,11 @@ RANDOM_UA_TYPE = "random"
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+   'ArticleSpider.pipelines.ElasticsearchPipeline': 2
    # 'ArticleSpider.pipelines.JsonExporterPipeline': 2,
    # 'scrapy.pipelines.images.ImagesPipeline': 1,
    # 'ArticleSpider.pipelines.ArticleImagePipeline': 1,
-   'ArticleSpider.pipelines.MySqlTwistedPipeline': 2,
+   #'ArticleSpider.pipelines.MySqlTwistedPipeline': 2,
 }
 IMAGES_URLS_FIELD = "front_image_url"
 project_dir = os.path.abspath(os.path.dirname(__file__))
